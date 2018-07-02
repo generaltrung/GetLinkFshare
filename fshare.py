@@ -46,21 +46,16 @@ class Fshare:
         return link
 
     def get_folder_info(self, url):
-        page = requests.get(url)
-        h = BeautifulSoup(page.content, 'html.parser')
-        result = list()
-        for l in h.find_all(class_='filename', href=True, title=True):
-            if l.text.strip():
-                result.append((l['href'], l['title']))
+        page = requests.get("https://www.fshare.vn/api/v3/files/folder?linkcode=" + url.split('/')[-1])
+        result = page.json()
 
         return result
 
     def get_folder(self, url):
-        link_list = self.get_folder_info(url)
+        link_list = self.get_folder_info(url)['items']
         for link in link_list:
-            l = self.get_link(link[0])
-            print(l)
-            print(link[1])
+            l = self.get_link("www.fshare.vn/file/" + link['linkcode'])
+            print(link['name'])
             cmd = ['wget', '--restrict-file-names=nocontrol', '-nc', l]
             env = os.environ.copy()
             env['LD_LIBRARY_PATH'] = ''

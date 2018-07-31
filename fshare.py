@@ -42,6 +42,11 @@ class Fshare:
                     'withFcode5': 0}
         # self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
         download_response = self.fshare.post(self.download_url, data_get).decode()
+        wait_time = int(json.loads(download_response.splitlines()[-1])['wait_time'])
+        if wait_time != 0:
+            self.login()
+            return self.get_link(url)
+
         link = json.loads(download_response.splitlines()[-1])['url']
         return link
 

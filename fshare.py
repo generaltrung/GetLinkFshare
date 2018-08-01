@@ -51,13 +51,22 @@ class Fshare:
         return link
 
     def get_folder_info(self, url):
-        page = requests.get("https://www.fshare.vn/api/v3/files/folder?linkcode=" + url.split('/')[-1])
-        result = page.json()
-
+        endloop = False
+        page = requests.get("https://www.fshare.vn/api/v3/files/folder?linkcode=" + url.split('/')[-1]).json()
+        result = page['items']
+        paging = page['_links']
+        while endloop is False:
+            if 'next' in paging:
+                page = requests.get("https://www.fshare.vn/api/" + paging['next']).json()
+                paging = page['_links']
+                result.extend(page['items'])
+            else:
+                endloop = True
+                
         return result
 
     def get_folder(self, url):
-        link_list = self.get_folder_info(url)['items']
+        link_list = self.get_folder_info(url)
         for link in link_list:
             l = self.get_link("www.fshare.vn/file/" + link['linkcode'])
             print(link['name'])

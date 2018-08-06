@@ -11,7 +11,6 @@ def main():
         acc_info = json.load(fp=fp)
 
     fshare = Fshare(email=acc_info['email'], password=acc_info['pass'])
-    fshare.login()
     list_argv = sys.argv
     if len(list_argv) > 1:
         for link in list_argv[1::]:

@@ -1,5 +1,6 @@
 import requests
 import curl
+import pycurl
 from bs4 import BeautifulSoup
 import subprocess
 import ctypes
@@ -20,6 +21,8 @@ class Fshare:
         self.email = email
         self.password = password
         self.fshare = curl.Curl(base_url="https://www.fshare.vn")
+        self.fshare.set_option(pycurl.COOKIEFILE, os.path.join(os.path.dirname(__file__), 'fshare.cookie'))
+        self.fshare.set_option(pycurl.COOKIEJAR, os.path.join(os.path.dirname(__file__), 'fshare.cookie'))
         self.login_url = "site/login"
         self.download_url = "download/get"
         get_reponse = self.fshare.get(url=self.login_url).decode()

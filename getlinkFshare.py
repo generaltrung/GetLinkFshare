@@ -15,9 +15,17 @@ def main():
     if len(list_argv) > 1:
         for link in list_argv[1::]:
             if link.find('fshare.vn/file') >= 0:
-                print(fshare.get_link(link))
+                link_paras = link.split('|')
+                passwd = None
+                if len(link_paras) > 1:
+                    passwd = link_paras[1]
+                print(fshare.get_link(link_paras[0], passwd))
             else:
-                fshare.get_folder(link)
+                link_paras = link.split('|')
+                passwd = None
+                if len(link_paras) > 1:
+                    passwd = link_paras[1]
+                fshare.get_folder(link_paras[0], passwd)
 
 
 if __name__ == '__main__':

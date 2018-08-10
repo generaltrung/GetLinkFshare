@@ -7,6 +7,7 @@ import ctypes
 import signal
 import os
 import json
+import re
 libc = ctypes.CDLL("libc.so.6")
 
 
@@ -38,20 +39,33 @@ class Fshare:
                           'LoginForm[rememberMe]': 1}
             self.fshare.post(self.login_url, data_login).decode()
 
-    def get_link(self, url):
-        data_get = {'_csrf-app': self.fs_csrf,
-                    'fcode5': '',
-                    'linkcode': url.split('/')[-1],
-                    'withFcode5': 0}
-        # self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
-        download_response = self.fshare.post(self.download_url, data_get).decode()
-        wait_time = int(json.loads(download_response.splitlines()[-1])['wait_time'])
-        if wait_time != 0:
-            self.login()
-            return self.get_link(url)
+    def get_link(self, url, passwd=None):
 
-        link = json.loads(download_response.splitlines()[-1])['url']
+        link = self.check_link(url)
+        if link == -1:
+            self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
+            data_get_pwd = {'_csrf-app': self.fs_csrf,
+                            "DownloadPasswordForm[password]": passwd}
+            self.fshare.post(url, data_get_pwd)
+            return re.findall(r'(Location:)(.*)', self.fshare.header())[0][1].strip()
         return link
+
+    def make_sure_login(self):
+        self.fshare.get("https://www.fshare.vn/file/manager")
+        is_logged = re.findall(r'(Location:)(.*)', self.fshare.header())
+        if len(is_logged) > 0:
+            self.login()
+
+    def check_link(self, url):
+        self.make_sure_login()
+        self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
+        self.fshare.get(url)
+        is_passwd = re.findall(r'(Location:)(.*)', self.fshare.header())
+        if len(is_passwd) > 0:
+            return is_passwd[0][1].strip()
+
+        return -1
+
 
     def get_folder_info(self, url):
         endloop = False
@@ -68,10 +82,10 @@ class Fshare:
                 
         return result
 
-    def get_folder(self, url):
+    def get_folder(self, url, passwd=None):
         link_list = self.get_folder_info(url)
         for link in link_list:
-            l = self.get_link("www.fshare.vn/file/" + link['linkcode'])
+            l = self.get_link("https://www.fshare.vn/file/" + link['linkcode'], passwd)
             print(link['name'])
             cmd = ['wget', '--tries=0', '--restrict-file-names=nocontrol', '--continue', l]
             env = os.environ.copy()

@@ -87,7 +87,7 @@ class Fshare:
         for link in link_list:
             l = self.get_link("https://www.fshare.vn/file/" + link['linkcode'], passwd)
             print(link['name'])
-            cmd = ['wget', '--tries=0', '--restrict-file-names=nocontrol', '--continue', l]
+            cmd = ['wget', '-4', '--tries=0', '--restrict-file-names=nocontrol', '--continue', l]
             env = os.environ.copy()
             env['LD_LIBRARY_PATH'] = ''
             p = subprocess.Popen(cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env)

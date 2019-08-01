@@ -24,6 +24,19 @@ def get_link(link):
     print(fshare.get_link(link_paras[0], passwd))
 
 
+def download(link):
+    link_paras = link.split('|')
+    passwd = None
+    if len(link_paras) > 1:
+        passwd = link_paras[1]
+    download_link = fshare.get_link(link_paras[0], passwd)
+    cmd = ['wget', '-4', '--tries=0', '--restrict-file-names=nocontrol', '--continue', download_link]
+    env = os.environ.copy()
+    env['LD_LIBRARY_PATH'] = ''
+    p = subprocess.Popen(cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env)
+    p.wait()
+
+
 def download_folder(link):
     link_paras = link.split('|')
     passwd = None

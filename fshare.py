@@ -23,7 +23,6 @@ class Fshare:
         self.password = password
         self.fshare = curl.Curl(base_url="https://www.fshare.vn")
         self.fshare.set_option(pycurl.COOKIEFILE, os.path.join(os.path.dirname(__file__), 'fshare.cookie'))
-        self.fshare.set_option(pycurl.COOKIEJAR, os.path.join(os.path.dirname(__file__), 'fshare.cookie'))
         self.login_url = "site/login"
         self.download_url = "download/get"
         get_reponse = self.fshare.get(url=self.login_url).decode()
@@ -38,6 +37,7 @@ class Fshare:
                           'LoginForm[password]': self.password,
                           'LoginForm[rememberMe]': 1}
             self.fshare.post(self.login_url, data_login).decode()
+            self.fshare.set_option(pycurl.COOKIEJAR, os.path.join(os.path.dirname(__file__), 'fshare.cookie'))
 
     def get_link(self, url, passwd=None):
 

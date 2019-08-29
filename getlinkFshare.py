@@ -1,13 +1,13 @@
 #!/usr/bin/env python
-from fshare import Fshare
-from fshare import set_pdeathsig
-from fshare import libc
-import sys
 import json
 import os
-import fire
-import subprocess
 import signal
+import subprocess
+
+import fire
+
+from fshare import Fshare
+from fshare import set_pdeathsig
 
 with open(os.path.join(os.path.dirname(__file__), 'acc_info.json'), 'r') as fp:
     # global acc_info

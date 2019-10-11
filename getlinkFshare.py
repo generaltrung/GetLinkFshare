@@ -24,6 +24,10 @@ def get_link(link):
     print(fshare.get_link(link_paras[0], passwd))
 
 
+def get_link_info(url):
+    return fshare.get_link_info(url)
+
+
 def download(link):
     link_paras = link.split('|')
     passwd = None
@@ -63,6 +67,7 @@ def download_from_file(file_name):
 
 if __name__ == '__main__':
     fire.Fire()
+
 
 
 

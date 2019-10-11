@@ -66,6 +66,12 @@ class Fshare:
 
         return -1
 
+    def get_link_info(self, url):
+        param = {'_csrf-app': self.fs_csrf,
+                 "linkcode": url.split('/')[-1],
+                 "withFcode5": 0}
+        r = self.fshare.post(self.download_url, param)
+        return r
 
     def get_folder_info(self, url):
         endloop = False

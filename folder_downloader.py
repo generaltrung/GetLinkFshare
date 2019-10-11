@@ -86,7 +86,5 @@ def das_from_linkfile(link_file, onedrive_path):
         idx = idx + 1
 
 
-# if __name__ == '__main__':
-#     fire.Fire()
-
-das_from_linkfile('download_link', 'skjfsf')
+if __name__ == '__main__':
+    fire.Fire()

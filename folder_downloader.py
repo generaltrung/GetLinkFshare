@@ -69,7 +69,7 @@ def das_from_linkfile(link_file, onedrive_path):
     idx = current_idx['current_idx']
 
     for i in range(idx + 1, len(folder_link)):
-        name = get_link_info(folder_link[i])
+        name = get_link_info(folder_link[i])['name']
         link = folder_link[i]
         print('Downloading: ' + name)
         r = download(link)

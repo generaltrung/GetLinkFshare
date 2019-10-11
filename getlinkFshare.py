@@ -65,10 +65,8 @@ def download_from_file(file_name):
             p.wait()
 
 
-# if __name__ == '__main__':
-#     fire.Fire()
-
-print(json.loads(get_link_info("https://www.fshare.vn/file/4EEJ9F2O2VZ2"))['name'])
+if __name__ == '__main__':
+    fire.Fire()
 
 
 

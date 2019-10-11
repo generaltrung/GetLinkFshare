@@ -69,7 +69,7 @@ def das_from_linkfile(link_file, onedrive_path):
     idx = current_idx['current_idx']
 
     for i in range(idx + 1, len(folder_link)):
-        name = get_link_info(folder_link[i])['name']
+        name = get_link_info(folder_link[i].strip())['name']
         link = folder_link[i]
         print('Downloading: ' + name)
         r = download(link)
@@ -86,5 +86,7 @@ def das_from_linkfile(link_file, onedrive_path):
         idx = idx + 1
 
 
-if __name__ == '__main__':
-    fire.Fire()
+# if __name__ == '__main__':
+#     fire.Fire()
+
+das_from_linkfile('download_link', 'skjfsf')

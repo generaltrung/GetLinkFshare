@@ -25,7 +25,7 @@ def get_link(link):
 
 
 def get_link_info(url):
-    return fshare.get_link_info(url)
+    return json.loads(fshare.get_link_info(url))
 
 
 def download(link):
@@ -65,8 +65,10 @@ def download_from_file(file_name):
             p.wait()
 
 
-if __name__ == '__main__':
-    fire.Fire()
+# if __name__ == '__main__':
+#     fire.Fire()
+
+print(json.loads(get_link_info("https://www.fshare.vn/file/4EEJ9F2O2VZ2"))['name'])
 
 
 

@@ -70,7 +70,7 @@ class Fshare:
         param = {'_csrf-app': self.fs_csrf,
                  "linkcode": url.split('/')[-1],
                  "withFcode5": 0}
-        r = self.fshare.post(self.download_url, param)
+        r = self.fshare.post(self.download_url, param).decode()
         return r
 
     def get_folder_info(self, url):

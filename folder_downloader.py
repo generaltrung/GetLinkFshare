@@ -51,7 +51,7 @@ def download_and_sync(link_file, onedrive_path):
         if r != 0:
             break
         print("Start sync")
-        r = sync_rclone(name, onedrive_path)
+        r = sync_rclone(name, onedrive_path + folder_link[i]['path'])
         if r != 0:
             break
         os.remove(name)

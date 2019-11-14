@@ -2,6 +2,7 @@
 import json
 import os
 import fire
+import time
 
 from fshare import Fshare
 
@@ -25,6 +26,8 @@ def fetch_folder_tree(folder_link):
             s = s + size / 1024 / 1024
             result.append({'name': name, 'link': link, 'size': size, 'path': path})
         if item['type'] == 0:
+            print("Fetching folder: " + item['name'], end='\r')
+            time.sleep(1)
             (child_list, child_size) = fetch_folder_tree("https://www.fshare.vn/folder/" + item['linkcode'])
             result.extend(child_list)
             s = s + child_size
@@ -40,7 +43,7 @@ def fetch_folder(folder_link, file_name, path=None):
     with open(name_path, 'w') as folder_fp:
         json.dump(result, folder_fp)
 
-    print("Total size: %f" % s)
+    print("\n" + "Total size: %f MB" % s)
 
 
 if __name__ == '__main__':

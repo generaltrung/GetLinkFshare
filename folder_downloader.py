@@ -110,7 +110,7 @@ def stream_and_sync_folder(link_file, onedrive_path):
         name = folder_link[i]['name']
         link = folder_link[i]['link']
         size = folder_link[i]['size']/1024/1024
-        print("Start streaming and sync " + name + " With size = " + size + " MB")
+        print("Start streaming and sync " + name + " With size = " + str(size) + " MB")
         r = stream_and_sync(name, link, onedrive_path + folder_link[i]['path'])
         if r != 0:
             break

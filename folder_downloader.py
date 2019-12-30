@@ -6,17 +6,17 @@ import signal
 import subprocess
 import fire
 from getlinkFshare import get_link_info
+from getlinkFshare import get_link
 
 libc = ctypes.CDLL("libc.so.6")
 
-FSHARE_PATH = '/root/GetLinkFshare/getlinkFshare.py'
+FSHARE_PATH = os.path.join(os.path.dirname(__file__), 'getlinkFshare.py')
 
 
 def set_pdeathsig(sig=signal.SIGTERM):
     def call_able():
         return libc.prctl(1, sig)
     return call_able
-
 
 def download(link):
     cmd = [FSHARE_PATH, 'download', link]
@@ -86,5 +86,39 @@ def das_from_linkfile(link_file, onedrive_path):
         idx = idx + 1
 
 
+def stream_and_sync(name, link, sync_path):
+    dwn_link = get_link(link)
+    env = os.environ.copy()
+    env['LD_LIBRARY_PATH'] = ''
+    curl_cmd = ['curl', '-s', dwn_link]
+    rclone_cmd = ['rclone', 'rcat', '--stats-one-line', '-P', '--stats', '2s', os.path.join(sync_path, name)]
+    process_curl = subprocess.Popen(curl_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdout=subprocess.PIPE)
+    process_rclone = subprocess.Popen(rclone_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdin=process_curl.stdout)
+
+    process_curl.stdout.close()
+    return process_rclone.communicate()[0]
+
+
+def stream_and_sync_folder(link_file, onedrive_path):
+    with open(link_file, 'r') as fp:
+        folder_link = json.load(fp)
+
+    current_idx = json.load(open('current_idx', 'r')) if os.path.exists('current_idx') else {'current_idx': -1}
+    idx = current_idx['current_idx']
+
+    for i in range(idx + 1, len(folder_link)):
+        name = folder_link[i]['name']
+        link = folder_link[i]['link']
+        print("Start streaming and sync " + name)
+        r = stream_and_sync(name, link, onedrive_path + folder_link[i]['path'])
+        if r != 0:
+            break
+        current_idx = {'current_idx': idx + 1}
+        with open('current_idx', 'w') as current:
+            json.dump(current_idx, current)
+        idx = idx + 1
+
 if __name__ == '__main__':
     fire.Fire()
+
+

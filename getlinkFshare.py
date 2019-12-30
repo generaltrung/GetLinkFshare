@@ -21,7 +21,10 @@ def get_link(link):
     passwd = None
     if len(link_paras) > 1:
         passwd = link_paras[1]
-    print(fshare.get_link(link_paras[0], passwd))
+
+    result = fshare.get_link(link_paras[0], passwd)
+    print(result)
+    return result
 
 
 def get_link_info(url):

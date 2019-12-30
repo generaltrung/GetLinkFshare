@@ -96,7 +96,9 @@ def stream_and_sync(name, link, sync_path):
     process_rclone = subprocess.Popen(rclone_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdin=process_curl.stdout)
 
     process_curl.stdout.close()
-    return process_rclone.communicate()[0]
+    process_rclone.communicate()[0]
+    result = process_rclone.wait()
+    return result
 
 
 def stream_and_sync_folder(link_file, onedrive_path):

@@ -23,7 +23,7 @@ def get_link(link):
         passwd = link_paras[1]
 
     result = fshare.get_link(link_paras[0], passwd)
-    print(result)
+    #print(result)
     return result
 
 

@@ -86,7 +86,8 @@ def das_from_linkfile(link_file, onedrive_path):
         idx = idx + 1
 
 
-def stream_and_sync(name, link, sync_path):
+def stream_and_sync(link, sync_path):
+    name = get_link_info(link)['name']
     dwn_link = get_link(link)
     flag = "http://download"
     if flag not in dwn_link:

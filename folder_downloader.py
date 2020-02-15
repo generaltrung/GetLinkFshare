@@ -88,6 +88,7 @@ def das_from_linkfile(link_file, onedrive_path):
 
 def stream_and_sync(link, sync_path):
     name = get_link_info(link)['name']
+    print(name)
     dwn_link = get_link(link)
     flag = "http://download"
     if flag not in dwn_link:
@@ -117,7 +118,7 @@ def stream_and_sync_folder(link_file, onedrive_path):
         link = folder_link[i]['link']
         size = folder_link[i]['size']/1024/1024
         print("Start streaming and sync " + name + " With size = " + str(size) + " MB")
-        r = stream_and_sync(name, link, onedrive_path + folder_link[i]['path'])
+        r = stream_and_sync(link, onedrive_path + folder_link[i]['path'])
         if r != 0:
             print("Script ended with some errors")
             break

@@ -62,7 +62,10 @@ class Fshare:
         self.fshare.get(url)
         is_passwd = re.findall(r'(Location:)(.*)', self.fshare.header())
         if len(is_passwd) > 0:
-            return is_passwd[0][1].strip()
+            flag = "http://download"
+            dwn_link = is_passwd[0][1].strip()
+            if flag in dwn_link:
+                return dwn_link
 
         return -1
 

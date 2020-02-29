@@ -61,7 +61,7 @@ def download_and_sync(link_file, onedrive_path):
         idx = idx + 1
 
 
-def das_from_linkfile(link_file, onedrive_path):
+def das_from_linkfile(link_file, sync_path):
     with open(link_file, 'r') as f:
         folder_link = f.readlines()
 
@@ -69,17 +69,11 @@ def das_from_linkfile(link_file, onedrive_path):
     idx = current_idx['current_idx']
 
     for i in range(idx + 1, len(folder_link)):
-        name = get_link_info(folder_link[i].strip())['name']
         link = folder_link[i].strip()
-        print('Downloading: ' + name)
-        r = download(link)
+        r = stream_and_sync(link, sync_path)
         if r != 0:
+            print("Script ended with some errors")
             break
-        print("Start sync")
-        r = sync_rclone(name, onedrive_path)
-        if r != 0:
-            break
-        os.remove(name)
         current_idx = {'current_idx': idx + 1}
         with open('current_idx', 'w') as current:
             json.dump(current_idx, current)

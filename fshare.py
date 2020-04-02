@@ -32,6 +32,7 @@ class Fshare:
 
     def login(self):
         if self.isLogin is False:
+            print("Login Fshare")
             data_login = {'_csrf-app': self.fs_csrf,
                           'LoginForm[email]': self.email,
                           'LoginForm[password]': self.password,

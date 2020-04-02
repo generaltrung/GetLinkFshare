@@ -5,18 +5,41 @@ import os
 import signal
 import subprocess
 import fire
-from getlinkFshare import get_link_info
-from getlinkFshare import get_link
+# from getlinkFshare import get_link_info
+# from getlinkFshare import get_link
+from fshare import Fshare
 
 libc = ctypes.CDLL("libc.so.6")
 
 FSHARE_PATH = os.path.join(os.path.dirname(__file__), 'getlinkFshare.py')
+
+with open(os.path.join(os.path.dirname(__file__), 'acc_info.json'), 'r') as fp:
+    # global acc_info
+    acc_info = json.load(fp=fp)
+
+fshare_obj = Fshare(email=acc_info['email'], password=acc_info['pass'])
 
 
 def set_pdeathsig(sig=signal.SIGTERM):
     def call_able():
         return libc.prctl(1, sig)
     return call_able
+
+
+def get_link(link):
+    link_paras = link.split('|')
+    passwd = None
+    if len(link_paras) > 1:
+        passwd = link_paras[1]
+
+    result = fshare_obj.get_link(link_paras[0], passwd)
+    #print(result)
+    return result
+
+
+def get_link_info(url):
+    return json.loads(fshare_obj.get_link_info(url))
+
 
 def download(link):
     cmd = [FSHARE_PATH, 'download', link]

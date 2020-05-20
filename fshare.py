@@ -22,7 +22,9 @@ class Fshare:
         self.email = email
         self.password = password
         self.fshare = curl.Curl(base_url="https://www.fshare.vn")
+        self.user_agent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0"
         self.fshare.set_option(pycurl.COOKIEFILE, os.path.join(os.path.dirname(__file__), 'fshare.cookie'))
+        self.fshare.set_option(pycurl.USERAGENT, self.user_agent)
         self.login_url = "site/login"
         self.download_url = "download/get"
         get_reponse = self.fshare.get(url=self.login_url).decode()

@@ -50,19 +50,7 @@ class Fshare:
             data_get_pwd = {'_csrf-app': self.fs_csrf,
                             "DownloadPasswordForm[password]": passwd}
             self.fshare.post(url, data_get_pwd)
-            t = re.findall(r'(Location:)(.*)', self.fshare.header())
-
-            if len(t) > 0:
-                token = "token"
-                flag = "http://download"
-                dwn_link = t[0][1].strip()
-                if token in dwn_link:
-                    self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
-                    self.fshare.get(dwn_link)
-                    link_dl = re.findall(r'(Location:)(.*)', self.fshare.header())
-                    if len(link_dl) > 0:
-                        if flag in link_dl[0][1].strip():
-                            return link_dl[0][1].strip()
+            return re.findall(r'(Location:)(.*)', self.fshare.header())[0][1].strip()
         return link
 
     def make_sure_login(self):

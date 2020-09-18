@@ -43,14 +43,24 @@ class Fshare:
             self.fshare.set_option(pycurl.COOKIEJAR, os.path.join(os.path.dirname(__file__), 'fshare.cookie'))
 
     def get_link(self, url, passwd=None):
-
         link = self.check_link(url)
         if link == -1:
             self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
-            data_get_pwd = {'_csrf-app': self.fs_csrf,
-                            "DownloadPasswordForm[password]": passwd}
-            self.fshare.post(url, data_get_pwd)
-            return re.findall(r'(Location:)(.*)', self.fshare.header())[0][1].strip()
+            self.fshare.get(url)
+            res = re.findall(r'(Location:)(.*)', self.fshare.header())
+            if len(res) > 0:
+                token = "token"
+                flag = "http://download"
+                dwn_link = res[0][1].strip()
+                if token in dwn_link:
+                    self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
+                    data_get_pwd = {'_csrf-app': self.fs_csrf,
+                                    "DownloadPasswordForm[password]": passwd}
+                    self.fshare.post(dwn_link, data_get_pwd)
+                    link = re.findall(r'(Location:)(.*)', self.fshare.header())
+                    if len(link) > 0:
+                        if flag in link[0][1].strip():
+                            return link[0][1].strip()
         return link
 
     def make_sure_login(self):

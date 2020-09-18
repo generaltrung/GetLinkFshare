@@ -13,7 +13,7 @@ with open(os.path.join(os.path.dirname(__file__), 'acc_info.json'), 'r') as fp:
 fshare = Fshare(email=acc_info['email'], password=acc_info['pass'])
 
 
-def fetch_folder_tree(folder_link):
+def fetch_folder_tree(folder_link, password=None):
     list_link = fshare.get_folder_info(folder_link)
     result = []
     s = 0
@@ -21,6 +21,8 @@ def fetch_folder_tree(folder_link):
         if item['type'] == 1:
             name = item['name']
             link = "https://www.fshare.vn/file/" + item['linkcode']
+            if password is not None:
+                link = link + '|' + password
             size = item['size']
             path = item['path']
             s = s + size / 1024 / 1024
@@ -35,7 +37,10 @@ def fetch_folder_tree(folder_link):
     return result, s
 
 def fetch_folder(folder_link, file_name, path=None):
-    (result, s) = fetch_folder_tree(folder_link)
+    password = None
+    if len(folder_link.split('|')) > 1:
+        password = folder_link.split('|')[1]
+    (result, s) = fetch_folder_tree(folder_link, password)
 
     name_path = file_name
     if path is not None:

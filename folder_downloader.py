@@ -104,8 +104,8 @@ def das_from_linkfile(link_file, sync_path):
 
 
 def stream_and_sync(link, sync_path):
-    name = get_link_info(link)['name']
-    print(name)
+    # name = get_link_info(link)['name']
+    # print(name)
     dwn_link = get_link(link)
     flag = "http://download"
     if flag not in dwn_link:

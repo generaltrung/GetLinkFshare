@@ -50,6 +50,7 @@ class Fshare:
         if ispass == 0:
             link = self.check_link(url)
         else:
+            self.make_sure_login()
             self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
             self.fshare.get(url)
             res = re.findall(r'(Location:)(.*)', self.fshare.header())

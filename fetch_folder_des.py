@@ -40,7 +40,7 @@ def fetch_folder(folder_link, file_name, path=None):
     password = None
     if len(folder_link.split('|')) > 1:
         password = folder_link.split('|')[1]
-    (result, s) = fetch_folder_tree(folder_link, password)
+    (result, s) = fetch_folder_tree(folder_link.split['|'][0], password)
 
     name_path = file_name
     if path is not None:

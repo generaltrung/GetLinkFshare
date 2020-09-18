@@ -8,12 +8,14 @@ import signal
 import os
 import json
 import re
+
 libc = ctypes.CDLL("libc.so.6")
 
 
 def set_pdeathsig(sig=signal.SIGTERM):
     def call_able():
         return libc.prctl(1, sig)
+
     return call_able
 
 
@@ -28,7 +30,7 @@ class Fshare:
         self.login_url = "site/login"
         self.download_url = "download/get"
         get_reponse = self.fshare.get(url=self.login_url).decode()
-        self.fs_csrf = BeautifulSoup(get_reponse, 'html.parser').find("meta", attrs={'name': 'csrf-token'})\
+        self.fs_csrf = BeautifulSoup(get_reponse, 'html.parser').find("meta", attrs={'name': 'csrf-token'}) \
             .get("content")
         self.isLogin = False
 
@@ -43,8 +45,11 @@ class Fshare:
             self.fshare.set_option(pycurl.COOKIEJAR, os.path.join(os.path.dirname(__file__), 'fshare.cookie'))
 
     def get_link(self, url, passwd=None):
-        link = self.check_link(url)
-        if link == -1:
+        link = -1
+        ispass = int(self.get_link_info(url)['current']['pwd'])
+        if ispass == 0:
+            link = self.check_link(url)
+        else:
             self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
             self.fshare.get(url)
             res = re.findall(r'(Location:)(.*)', self.fshare.header())
@@ -89,10 +94,9 @@ class Fshare:
         return -1
 
     def get_link_info(self, url):
-        param = {'_csrf-app': self.fs_csrf,
-                 "linkcode": url.split('/')[-1],
-                 "withFcode5": 0}
-        r = self.fshare.post(self.download_url, param).decode()
+        r = requests.get("https://www.fshare.vn/api/v3/files/folder?linkcode="
+                         + url.split('/')[-1].split('|')[0]).json()
+
         return r
 
     def get_folder_info(self, url):
@@ -107,7 +111,7 @@ class Fshare:
                 result.extend(page['items'])
             else:
                 endloop = True
-                
+
         return result
 
     def get_folder(self, url, passwd=None):

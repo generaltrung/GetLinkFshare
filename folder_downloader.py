@@ -38,7 +38,7 @@ def get_link(link):
 
 
 def get_link_info(url):
-    return json.loads(fshare_obj.get_link_info(url))
+    return fshare_obj.get_link_info(url)
 
 
 def download(link):
@@ -104,8 +104,8 @@ def das_from_linkfile(link_file, sync_path):
 
 
 def stream_and_sync(link, sync_path):
-    # name = get_link_info(link)['name']
-    # print(name)
+    name = get_link_info(link)['current']['name']
+    print(name)
     dwn_link = get_link(link)
     flag = "http://download"
     if flag not in dwn_link:

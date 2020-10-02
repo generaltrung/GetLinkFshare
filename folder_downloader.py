@@ -107,7 +107,7 @@ def stream_and_sync(link, sync_path):
     name = get_link_info(link)['current']['name']
     print(name)
     dwn_link = get_link(link)
-    flag = "http://download"
+    flag = "download"
     if flag not in dwn_link:
         return -1
     env = os.environ.copy()

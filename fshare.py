@@ -56,7 +56,7 @@ class Fshare:
             res = re.findall(r'(Location:)(.*)', self.fshare.header())
             if len(res) > 0:
                 token = "token"
-                flag = "http://download"
+                flag = "download"
                 dwn_link = res[0][1].strip()
                 if token in dwn_link:
                     self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
@@ -82,7 +82,7 @@ class Fshare:
         is_passwd = re.findall(r'(Location:)(.*)', self.fshare.header())
         if len(is_passwd) > 0:
             token = "token"
-            flag = "http://download"
+            flag = "download"
             dwn_link = is_passwd[0][1].strip()
             if token in dwn_link:
                 self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)

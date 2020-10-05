@@ -112,7 +112,7 @@ def stream_and_sync(link, sync_path):
         return -1
     env = os.environ.copy()
     env['LD_LIBRARY_PATH'] = ''
-    curl_cmd = ['curl', '-s', dwn_link]
+    curl_cmd = ['curl', '--insecure', '-s', dwn_link]
     rclone_cmd = ['rclone', 'rcat', '--stats-one-line', '-P', '--stats', '2s', os.path.join(sync_path, name)]
     process_curl = subprocess.Popen(curl_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdout=subprocess.PIPE)
     process_rclone = subprocess.Popen(rclone_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdin=process_curl.stdout)

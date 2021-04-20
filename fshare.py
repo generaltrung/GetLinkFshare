@@ -24,16 +24,19 @@ def dump_token(file_path, token, session_id):
 
 
 TOKEN_PATH = os.path.join(os.path.dirname(__file__), 'token.json')
-
+APP_INFO_PATH = os.path.join(os.path.dirname(__file__), 'app.json')
 
 class Fshare:
     def __init__(self, email, password):
         self.email = email
         self.password = password
+        with open(APP_INFO_PATH, 'r') as fp:
+            app_info = json.load(fp=fp)
+
         with open(TOKEN_PATH, 'r') as fp:
             token_info = json.load(fp=fp)
-        self.user_agent = token_info['user_agent']
-        self.app_key = token_info['app_key']
+        self.user_agent = app_info['user_agent']
+        self.app_key = app_info['app_key']
         self.token = token_info['token']
         self.session_id = token_info['session_id']
         self.isLogin = False

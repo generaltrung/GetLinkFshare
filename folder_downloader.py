@@ -8,6 +8,7 @@ import fire
 # from getlinkFshare import get_link_info
 # from getlinkFshare import get_link
 from fshare import Fshare
+import time
 
 libc = ctypes.CDLL("libc.so.6")
 
@@ -106,17 +107,23 @@ def das_from_linkfile(link_file, sync_path):
 def stream_and_sync(link, sync_path):
     name = get_link_info(link)['current']['name']
     print(name)
-    dwn_link = get_link(link)
-    flag = "download"
-    if flag not in dwn_link:
+    dwn_link = -1
+    for i in range(5):
+        if i > 0:
+            print("Retrying: " + str(i+1) + "times")
+        dwn_link = get_link(link)
+        if dwn_link is not -1:
+            break
+        fshare_obj.make_sure_login()
+        time.sleep(2.0)
+    if dwn_link == -1:
         return -1
     env = os.environ.copy()
     env['LD_LIBRARY_PATH'] = ''
-    curl_cmd = ['curl', '--insecure', '-s', dwn_link]
+    curl_cmd = ['curl', '-s', dwn_link]
     rclone_cmd = ['rclone', 'rcat', '--stats-one-line', '-P', '--stats', '2s', os.path.join(sync_path, name)]
     process_curl = subprocess.Popen(curl_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdout=subprocess.PIPE)
     process_rclone = subprocess.Popen(rclone_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdin=process_curl.stdout)
-
     process_curl.stdout.close()
     process_rclone.communicate()[0]
     result = process_rclone.wait()

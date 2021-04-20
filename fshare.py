@@ -1,13 +1,10 @@
-import requests
-import curl
-import pycurl
-from bs4 import BeautifulSoup
-import subprocess
 import ctypes
-import signal
-import os
 import json
-import re
+import os
+import signal
+import subprocess
+
+import requests
 
 libc = ctypes.CDLL("libc.so.6")
 
@@ -19,80 +16,98 @@ def set_pdeathsig(sig=signal.SIGTERM):
     return call_able
 
 
+def dump_token(file_path, token, session_id):
+    with open(file_path, 'w') as current_token:
+        data = {"token": token,
+                "session_id": session_id}
+        json.dump(data, current_token)
+
+
+TOKEN_PATH = os.path.join(os.path.dirname(__file__), 'token.json')
+
+
 class Fshare:
     def __init__(self, email, password):
         self.email = email
         self.password = password
-        self.fshare = curl.Curl(base_url="https://www.fshare.vn")
-        self.user_agent = "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:76.0) Gecko/20100101 Firefox/76.0"
-        self.fshare.set_option(pycurl.COOKIEFILE, os.path.join(os.path.dirname(__file__), 'fshare.cookie'))
-        self.fshare.set_option(pycurl.USERAGENT, self.user_agent)
-        self.login_url = "site/login"
-        self.download_url = "download/get"
-        get_reponse = self.fshare.get(url=self.login_url).decode()
-        self.fs_csrf = BeautifulSoup(get_reponse, 'html.parser').find("meta", attrs={'name': 'csrf-token'}) \
-            .get("content")
+        with open(TOKEN_PATH, 'r') as fp:
+            token_info = json.load(fp=fp)
+        self.user_agent = token_info['user_agent']
+        self.app_key = token_info['app_key']
+        self.token = token_info['token']
+        self.session_id = token_info['session_id']
         self.isLogin = False
+        self.header = {'User-Agent': self.user_agent,
+                       'Content-Type': 'application/json'}
+
+        self.login_url = "https://api.fshare.vn/api/user/login"
+        self.download_url = "https://api.fshare.vn/api/session/download"
+        self.refresh_url = "https://api.fshare.vn/api/user/refreshToken"
 
     def login(self):
         if self.isLogin is False:
+            return_code = 0
             print("Login Fshare")
-            data_login = {'_csrf-app': self.fs_csrf,
-                          'LoginForm[email]': self.email,
-                          'LoginForm[password]': self.password,
-                          'LoginForm[rememberMe]': 1}
-            self.fshare.post(self.login_url, data_login).decode()
-            self.fshare.set_option(pycurl.COOKIEJAR, os.path.join(os.path.dirname(__file__), 'fshare.cookie'))
+
+            data_login = {'user_email': self.email,
+                          'password': self.password,
+                          'app_key': self.app_key}
+
+            response = requests.post(self.login_url, headers=self.header, data=json.dumps(data_login))
+            status_code = response.status_code
+            if status_code == 200:
+                print("Login Successfully")
+                self.isLogin = True
+                result = response.json()
+                self.token = result['token']
+                self.session_id = result['session_id']
+                dump_token(TOKEN_PATH, self.token, self.session_id)
+            if status_code == 409 or status_code == 410:
+                print("Account locked")
+                return_code = -1
+
+            return return_code
 
     def get_link(self, url, passwd=None):
         link = -1
-        ispass = int(self.get_link_info(url)['current']['pwd'])
-        if ispass == 0:
-            link = self.check_link(url)
-        else:
-            self.make_sure_login()
-            self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
-            self.fshare.get(url)
-            res = re.findall(r'(Location:)(.*)', self.fshare.header())
-            if len(res) > 0:
-                token = "token"
-                flag = "download"
-                dwn_link = res[0][1].strip()
-                if token in dwn_link:
-                    self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
-                    data_get_pwd = {'_csrf-app': self.fs_csrf,
-                                    "DownloadPasswordForm[password]": passwd}
-                    self.fshare.post(dwn_link, data_get_pwd)
-                    link = re.findall(r'(Location:)(.*)', self.fshare.header())
-                    if len(link) > 0:
-                        if flag in link[0][1].strip():
-                            return link[0][1].strip()
+        header = self.header
+        header['Cookie'] = 'session_id=' + self.session_id
+
+        data = {'url': url,
+                'password': passwd,
+                'token': self.token,
+                'zipflag': 0}
+
+        response = requests.post(self.download_url, headers=header, data=json.dumps(data))
+        status_code = response.status_code
+        if status_code == 200:
+            result = response.json()
+            link = result['location']
+
         return link
 
     def make_sure_login(self):
-        self.fshare.get("https://www.fshare.vn/file/manager")
-        is_logged = re.findall(r'(Location:)(.*)', self.fshare.header())
-        if len(is_logged) > 0:
-            self.login()
+        if self.token != '' and self.session_id != '':
+            return_code = 0
+            data = {'token': self.token,
+                    'app_key': self.app_key}
 
-    def check_link(self, url):
-        self.make_sure_login()
-        self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
-        self.fshare.get(url)
-        is_passwd = re.findall(r'(Location:)(.*)', self.fshare.header())
-        if len(is_passwd) > 0:
-            token = "token"
-            flag = "download"
-            dwn_link = is_passwd[0][1].strip()
-            if token in dwn_link:
-                self.fshare.set_option(pycurl.FOLLOWLOCATION, 0)
-                self.fshare.get(dwn_link)
-                link = re.findall(r'(Location:)(.*)', self.fshare.header())
-                if len(link) > 0:
-                    if flag in link[0][1].strip():
-                        return link[0][1].strip()
+            response = requests.post(self.refresh_url, headers=self.header, data=json.dumps(data))
+            status_code = response.status_code
 
-        return -1
+            if status_code == 200:
+                result = response.json()
+                self.token = result['token']
+                self.session_id = result['session_id']
+                dump_token(TOKEN_PATH, self.token, self.session_id)
+
+            if status_code == 405 or status_code == 420:
+                self.isLogin = False
+                return_code = self.login()
+
+            return return_code
+        else:
+            return self.login()
 
     def get_link_info(self, url):
         r = requests.get("https://www.fshare.vn/api/v3/files/folder?linkcode="

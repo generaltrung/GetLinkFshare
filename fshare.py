@@ -104,7 +104,7 @@ class Fshare:
                 self.session_id = result['session_id']
                 dump_token(TOKEN_PATH, self.token, self.session_id)
 
-            if status_code == 405 or status_code == 420:
+            if status_code != 200:
                 self.isLogin = False
                 return_code = self.login()
 

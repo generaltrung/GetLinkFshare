@@ -95,7 +95,7 @@ def das_from_linkfile(link_file, sync_path):
     for i in range(idx + 1, len(folder_link)):
         link = folder_link[i].strip()
         r = stream_and_sync(link, sync_path)
-        if r != 0:
+        if (r != 0) and (r != 404):
             print("Script ended with some errors")
             break
         current_idx = {'current_idx': idx + 1}
@@ -105,8 +105,17 @@ def das_from_linkfile(link_file, sync_path):
 
 
 def stream_and_sync(link, sync_path):
-    name = get_link_info(link)['current']['name']
-    print(name)
+    is_link_alive = True
+    try:
+        name = None
+        name = get_link_info(link)['current']['name']
+        print(name)
+    except:
+        if name is None:
+            print('Error when get link info, may be link is dead')
+            is_link_alive = False
+        else:
+            name = name.encode('utf-8').decode('latin-1')
     dwn_link = -1
     for i in range(5):
         if i > 0:
@@ -114,14 +123,21 @@ def stream_and_sync(link, sync_path):
         dwn_link = get_link(link)
         if dwn_link is not -1:
             break
-        fshare_obj.make_sure_login()
+        if is_link_alive:
+            fshare_obj.make_sure_login()
         time.sleep(2.0)
     if dwn_link == -1:
-        return -1
+        return 404 
     env = os.environ.copy()
     env['LD_LIBRARY_PATH'] = ''
     curl_cmd = ['curl', '-s', dwn_link]
-    rclone_cmd = ['rclone', 'rcat', '--stats-one-line', '-P', '--stats', '2s', os.path.join(sync_path, name)]
+    try:
+        rclone_path = os.path.join(sync_path, name)
+        print(rclone_path)
+    except:
+        rclone_path = rclone_path.encode('utf-8').decode('latin-1') 
+    print(rclone_path)
+    rclone_cmd = ['rclone', 'rcat', '--stats-one-line', '-P', '--stats', '2s', rclone_path]
     process_curl = subprocess.Popen(curl_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdout=subprocess.PIPE)
     process_rclone = subprocess.Popen(rclone_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdin=process_curl.stdout)
     process_curl.stdout.close()
@@ -141,9 +157,12 @@ def stream_and_sync_folder(link_file, onedrive_path):
         name = folder_link[i]['name']
         link = folder_link[i]['link']
         size = folder_link[i]['size']/1024/1024
-        print("Start streaming and sync " + name + " With size = " + str(size) + " MB")
+        try:
+            print("Start streaming and sync " + name + " With size = " + str(size) + " MB")
+        except:
+            print("Start streaming and sync " + name.encode('utf-8').decode('latin-1') + " With size = " + str(size) + " MB")
         r = stream_and_sync(link, onedrive_path + folder_link[i]['path'])
-        if r != 0:
+        if (r != 0) and (r != 404):
             print("Script ended with some errors")
             break
         current_idx = {'current_idx': idx + 1}

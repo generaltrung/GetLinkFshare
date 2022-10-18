@@ -130,18 +130,14 @@ def stream_and_sync(link, sync_path):
         return 404 
     env = os.environ.copy()
     env['LD_LIBRARY_PATH'] = ''
-    curl_cmd = ['curl', '-s', dwn_link]
     try:
         rclone_path = os.path.join(sync_path, name)
         print(rclone_path)
     except:
         rclone_path = rclone_path.encode('utf-8').decode('latin-1') 
     print(rclone_path)
-    rclone_cmd = ['rclone', 'rcat', '--stats-one-line', '-P', '--stats', '2s', rclone_path]
-    process_curl = subprocess.Popen(curl_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdout=subprocess.PIPE)
-    process_rclone = subprocess.Popen(rclone_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env, stdin=process_curl.stdout)
-    process_curl.stdout.close()
-    process_rclone.communicate()[0]
+    rclone_cmd = ['rclone', 'copyurl', dwn_link, rclone_path, '-P']
+    process_rclone = subprocess.Popen(rclone_cmd, shell=False, preexec_fn=set_pdeathsig(signal.SIGTERM), env=env)
     result = process_rclone.wait()
     return result
 
@@ -162,6 +158,8 @@ def stream_and_sync_folder(link_file, onedrive_path):
         except:
             print("Start streaming and sync " + name.encode('utf-8').decode('latin-1') + " With size = " + str(size) + " MB")
         r = stream_and_sync(link, onedrive_path + folder_link[i]['path'])
+
+        # Need some investigation aboud this if clause. I'll do it later
         if (r != 0) and (r != 404):
             print("Script ended with some errors")
             break
